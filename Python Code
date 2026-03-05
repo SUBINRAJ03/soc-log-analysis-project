@@ -1,0 +1,66 @@
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    result = ""
+    if request.method == 'POST':
+        logdata = request.form['logdata'].lower()
+        alerts = []
+
+        # 🔐 Brute Force / Credential Stuffing
+        if logdata.count("failed") > 3:
+            alerts.append("⚠️ Possible Brute Force / Credential Stuffing Detected")
+
+        # 🪟 Windows Failed Login
+        if "eventid: 4625" in logdata:
+            alerts.append("🔎 Windows Unauthorized Login Attempts (Event ID 4625)")
+
+        # 🔓 Privilege Escalation
+        if "domain admins" in logdata or "whoami /priv" in logdata:
+            alerts.append("🚨 Possible Privilege Escalation Activity")
+
+        # 💻 Malware Indicators
+        if "trojan" in logdata or "malware" in logdata or ".exe downloaded" in logdata:
+            alerts.append("🦠 Malware Activity Detected")
+
+        # 🔒 Ransomware Indicators
+        if "encrypted files" in logdata or "ransom note" in logdata or ".locked" in logdata:
+            alerts.append("💀 Possible Ransomware Activity Detected")
+
+        # 🎣 Phishing Detection
+        if "phishing" in logdata or "urgent payment" in logdata or "qr code" in logdata:
+            alerts.append("🎣 Phishing Attempt Detected")
+
+        # 📤 Data Exfiltration
+        if "large outbound traffic" in logdata or "data transfer to external ip" in logdata:
+            alerts.append("📤 Possible Data Exfiltration Detected")
+
+        # 🧠 Suspicious PowerShell
+        if "-enc" in logdata or "powershell.exe -enc" in logdata:
+            alerts.append("🚨 Suspicious Encoded PowerShell Detected")
+
+        # 🌐 Web-Based Attacks
+        if "sql injection" in logdata or "' or 1=1 --" in logdata:
+            alerts.append("🌐 SQL Injection Attempt Detected")
+        if "dns spoofing" in logdata:
+            alerts.append("🌐 DNS Spoofing Attack Detected")
+        if "vulnerability exploit" in logdata or "xss" in logdata or "remote code execution" in logdata:
+            alerts.append("🌐 Web Application Vulnerability Exploit Detected")
+
+        # 🕵️ Advanced Persistent Threats / Insider Threats
+        if "beaconing" in logdata or "unauthorized access" in logdata or "suspicious behavior" in logdata:
+            alerts.append("🕵️ Possible APT or Insider Threat Detected (Malicious Beaconing / Suspicious Activity)")
+
+        # ☁️ Cloud & Network Attacks
+        if "ddos" in logdata or "high traffic" in logdata:
+            alerts.append("☁️ Possible DDoS Attack Detected")
+        if "misconfigured security" in logdata or "security misconfiguration" in logdata:
+            alerts.append("☁️ Cloud/Network Security Misconfiguration Detected")
+        if "unauthorized api access" in logdata or "unauthorized cloud api" in logdata:
+            alerts.append("☁️ Unauthorized Cloud API Access Detected")
+
+        # Final Result
+        if alerts:
+            result = "<br>".join(alerts)
+        else:
+            result = "No major threats detected."
+
+    return render_template_string(HTML, result=result)
